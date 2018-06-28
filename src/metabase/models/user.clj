@@ -9,10 +9,7 @@
             [metabase.models
              [permissions-group :as group]
              [permissions-group-membership :as perm-membership :refer [PermissionsGroupMembership]]]
-            ;; [metabase.util.date :as du]
-            [metabase.util
-             [encryption :as encryption]
-             [date :as du]]
+            [metabase.util.date :as du]
             [toucan
              [db :as db]
              [models :as models]])
@@ -22,7 +19,7 @@
 
 (models/defmodel User :core_user)
 
-(defn- pre-insert [{:keys [email password reset_token first_name last_name] :as user}]
+(defn- pre-insert [{:keys [email password reset_token] :as user}]
   (assert (u/email? email)
     (format "Not a valid email: '%s'" email))
   (assert (and (string? password)
@@ -37,10 +34,7 @@
     ;; always salt + encrypt the password before putting new User in the DB
     ;; TODO - we should do password encryption in pre-update too instead of in the session code
     (merge defaults user
-           {:first_name (encryption/maybe-encrypt first_name)
-            :last_name (encryption/maybe-encrypt last_name)
-            :email (encryption/maybe-encrypt email)
-            :password_salt salt
+           {:password_salt salt
             :password      (creds/hash-bcrypt (str salt password))}
            ;; if there's a reset token encrypt that as well
            (when reset_token
@@ -76,26 +70,14 @@
                                          :group_id (:id (group/admin))               ; which leads to a stack overflow of calls between the two
                                          :user_id  id))))                            ; TODO - could we fix this issue by using `post-delete!`?
   (when email
-    (assert (u/email? (encryption/maybe-decrypt email))))
-  ;; To update unencrypted emails to encrypted entries on update (if encryption is enabled by providing a secret key in env var):
-  (cond-> user
-    email (assoc :email (encryption/maybe-encrypt (encryption/maybe-decrypt email))))
+    (assert (u/email? email)))
   ;; If we're setting the reset_token then encrypt it before it goes into the DB
   (cond-> user
     reset_token (assoc :reset_token (creds/hash-bcrypt reset_token))))
 
-(defn- post-select [{:keys [first_name last_name email], :as user}]
+(defn- post-select [{:keys [first_name last_name], :as user}]
   (cond-> user
-    (or first_name last_name)
-      (assoc :common_name (str (encryption/maybe-decrypt first_name) " " (encryption/maybe-decrypt last_name)))
-    true
-      (assoc :email (encryption/maybe-decrypt email))
-    true
-      (assoc :first_name (encryption/maybe-decrypt first_name))
-    true
-      (assoc :last_name (encryption/maybe-decrypt last_name))
-    )
-  )
+    (or first_name last_name) (assoc :common_name (str first_name " " last_name))))
 
 (defn- pre-delete [{:keys [id]}]
   (binding [perm-membership/*allow-changing-all-users-group-members* true]
