@@ -304,7 +304,7 @@ export class ObjectDetail extends Component {
           className={cx("fixed left cursor-pointer text-brand-hover lg-ml2", {
             disabled: idValue <= 1,
           })}
-          style={{ top: "50%", left: "1em", transform: "translate(0, -50%)" }}
+          style={{ top: "50%", left: "4em", transform: "translate(0, -50%)" }}
         >
           <DirectionalButton
             direction="back"
