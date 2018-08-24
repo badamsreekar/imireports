@@ -131,9 +131,9 @@ export class NewQueryOptions extends Component {
             className="flex align-center justify-center"
             style={{ minHeight: "100%" }}
           >
-            <ol className="Grid Grid--guttersXl Grid--full sm-Grid--normal">
+            <ol className="Grid Grid--guttersXl Grid--full sm-Grid--normal" style={{ minWidth: "100%" }}>
               {showMetricOption && (
-                <li className="Grid-cell">
+                <li className="Grid-cell" style={{ minWidth: "33%" }}>
                   <NewQueryOption
                     image="app/img/questions_illustration"
                     title={t`Metrics`}
@@ -142,7 +142,7 @@ export class NewQueryOptions extends Component {
                   />
                 </li>
               )}
-              <li className="Grid-cell">
+              <li className="Grid-cell" style={{ minWidth: "33%" }}>
                 {/*TODO: Move illustrations to the new location in file hierarchy. At the same time put an end to the equal-size-@2x ridicule. */}
                 <NewQueryOption
                   image="app/img/query_builder_illustration"
@@ -157,7 +157,7 @@ export class NewQueryOptions extends Component {
                 />
               </li>
               {showSQLOption && (
-                <li className="Grid-cell">
+                <li className="Grid-cell" style={{ minWidth: "33%" }}>
                   <NewQueryOption
                     image="app/img/sql_illustration"
                     title={t`Native query`}
